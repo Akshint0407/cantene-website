@@ -580,7 +580,7 @@ const menuData = {
 
 // Function to update quantity and manage minus button state
 function updateQty(itemId, delta) {
-    const qtyElement = document.getElementById(qty-${itemId});
+    const qtyElement = document.getElementById(`qty-${itemId}`);
     const minusButton = qtyElement.previousElementSibling;
     let currentQty = parseInt(qtyElement.textContent);
     
@@ -605,7 +605,7 @@ function updateCartSummary() {
     let totalItems = 0;
     
     Object.keys(menuData).forEach(itemId => {
-        const qty = parseInt(document.getElementById(qty-${itemId}).textContent);
+        const qty = parseInt(document.getElementById(`qty-${itemId}`).textContent);
         if (qty > 0) {
             summaryHTML += `
                 <div class="cart-item">
@@ -619,7 +619,7 @@ function updateCartSummary() {
 
     const cartSummaryElement = document.getElementById("cart-summary");
     if (totalItems === 0) {
-        cartSummaryElement.innerHTML = <p style="text-align: center; color: #666;">No items added yet.</p>;
+        cartSummaryElement.innerHTML = `<p style="text-align: center; color: #666;">No items added yet.</p>`;
     } else {
         cartSummaryElement.innerHTML = summaryHTML;
     }
@@ -630,7 +630,7 @@ function calculate() {
     let total = 0;
     
     Object.keys(menuData).forEach(itemId => {
-        const qty = parseInt(document.getElementById(qty-${itemId}).textContent);
+        const qty = parseInt(document.getElementById(`qty-${itemId}`).textContent);
         total += qty * menuData[itemId].price;
     });
 
@@ -665,7 +665,7 @@ function showReceipt() {
     let totalItems = 0;
     
     Object.keys(menuData).forEach(itemId => {
-        totalItems += parseInt(document.getElementById(qty-${itemId}).textContent);
+        totalItems += parseInt(document.getElementById(`qty-${itemId}`).textContent);
     });
 
     if (totalItems === 0) {
@@ -679,7 +679,7 @@ function showReceipt() {
     // Generate Item Rows and calculate total
     Object.keys(menuData).forEach(itemId => {
         const item = menuData[itemId];
-        const qty = parseInt(document.getElementById(qty-${itemId}).textContent);
+        const qty = parseInt(document.getElementById(`qty-${itemId}`).textContent);
         
         if (qty > 0) {
             const itemTotal = qty * item.price;
@@ -833,7 +833,7 @@ function showReceipt() {
 // Initial setup: Disable all minus buttons on load and apply initial filter
 window.onload = function() {
     Object.keys(menuData).forEach(itemId => {
-        const qtyElement = document.getElementById(qty-${itemId});
+        const qtyElement = document.getElementById(`qty-${itemId}`);
         if (qtyElement) {
             const minusButton = qtyElement.previousElementSibling;
             minusButton.disabled = true;
@@ -850,3 +850,4 @@ window.onload = function() {
 
 </body>
 </html>
+
