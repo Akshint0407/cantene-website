@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> 
 
 <style>
-/* --- VARIABLES & BASE STYLES (Same as before) --- */
+/* --- VARIABLES & BASE STYLES --- */
 :root {
     --primary-green: #4CAF50; 
     --primary-dark: #333;
@@ -16,6 +16,7 @@
     --text-dark: #333;
     --text-light: #fff;
     --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --card-bg: #fff;
 }
 
 body {
@@ -32,7 +33,7 @@ body {
     padding: 20px 0;
 }
 
-/* --- HEADER / NAVIGATION (Same as before) --- */
+/* --- HEADER / NAVIGATION --- */
 .header {
     background-color: var(--primary-dark);
     color: var(--text-light);
@@ -60,7 +61,7 @@ body {
     color: var(--primary-green);
 }
 
-/* --- HERO SECTION (Same as before) --- */
+/* --- HERO SECTION --- */
 .hero {
     background: url('https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=1470&auto=format&fit=crop') no-repeat center center/cover;
     height: 350px;
@@ -131,13 +132,11 @@ body {
     gap: 25px;
 }
 
-/* Hide items when not in the selected category */
 .item-card.hidden {
     display: none !important;
 }
 
-
-/* --- ITEM CARD STYLING (Same as before) --- */
+/* --- ITEM CARD STYLING --- */
 .item-card {
     background-color: var(--card-bg);
     border-radius: 10px;
@@ -176,7 +175,7 @@ body {
     border-top: 1px dashed #eee;
 }
 
-/* Quantity Control Buttons (Same as before) */
+/* Quantity Control Buttons */
 .quantity-control {
     display: flex;
     align-items: center;
@@ -207,7 +206,7 @@ body {
     cursor: not-allowed;
 }
 
-/* --- CART / CHECKOUT SECTION (Same as before) --- */
+/* --- CART / CHECKOUT SECTION --- */
 .cart-sidebar {
     background-color: var(--card-bg);
     padding: 20px;
@@ -243,13 +242,40 @@ body {
 }
 .checkout-button {
     background: var(--primary-dark);
+    width: 100%;
+    margin-top: 10px;
 }
 .checkout-button:hover {
     background: black;
 }
 
+/* QR Code Modal Styling */
+#qr-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.8);
+    justify-content: center;
+    align-items: center;
+}
+.qr-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    max-width: 300px;
+}
+.qr-content img {
+    width: 200px;
+    height: 200px;
+    margin-bottom: 15px;
+}
 
-/* --- FOOTER (Same as before) --- */
+/* --- FOOTER --- */
 .footer {
     text-align: center;
     padding: 25px 0;
@@ -261,14 +287,24 @@ body {
 </head>
 
 <body>
+
+<div id="qr-modal">
+    <div class="qr-content">
+        <h3>Scan to Pay</h3>
+        <p id="qr-amount-text">Total: ₹0</p>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=canteen@upi&pn=CanteenConnect" alt="QR Code">
+        <p><small>After payment, click below to get receipt</small></p>
+        <button onclick="finalizeOrder()" class="qty-button" style="background: var(--primary-green); width: 100%;">PAYMENT DONE - GET RECEIPT</button>
+        <button onclick="closeQR()" style="margin-top: 10px; background: none; border: none; cursor: pointer; color: red;">Cancel</button>
+    </div>
+</div>
+
 <div class="header">
     <div class="container nav-bar">
         <div class="logo">Canteen Connect</div>
         <div class="nav-links">
             <a href="#menu"><i class="fas fa-list"></i> Menu</a>
-            <a href="#"><i class="fas fa-user"></i> Profile</a>
-            <a href="#"><i class="fas fa-phone-alt"></i> Contact</a>
-            <a href="#" style="color: var(--primary-green);"><i class="fas fa-sign-in-alt"></i> Login</a>
+            <a href="tel:+919876543210"><i class="fas fa-phone-alt"></i> Help: +91 98765 43210</a>
         </div>
     </div>
 </div>
@@ -293,7 +329,6 @@ body {
 
     <div class="menu-grid-area">
         <div class="menu-items-grid" id="menu-items-container">
-
             <div class="item-card item-type-breakfast" data-category="breakfast">
                 <div class="item-img" style="background-image: url('https://www.indianhealthyrecipes.com/wp-content/uploads/2020/01/poha.jpg');"></div>
                 <div class="item-content">
@@ -522,27 +557,33 @@ body {
 
         <div class="cart-sidebar">
             <h3><i class="fas fa-shopping-cart"></i> Your Order</h3>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight: 600; display: block; margin-bottom: 5px;">Your Name:</label>
+                <input type="text" id="user-name" placeholder="Enter your name" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
+            </div>
+
             <div id="cart-summary">
                 <p style="text-align: center; color: #666;">No items added yet.</p>
             </div>
 
             <div id="total">Total Amount: ₹0</div>
 
-            <button onclick="calculate()" class="qty-button checkout-button" style="margin-top: 10px;">
+            <button onclick="calculate()" class="qty-button checkout-button">
                 UPDATE TOTAL
             </button>
 
             <div style="margin-top: 15px; text-align: center;">
                 <label for="payment" style="font-weight: 600;">Payment:</label>
-                <select id="payment" style="padding: 8px; border-radius: 5px;">
+                <select id="payment" style="padding: 8px; border-radius: 5px; width: 100%;">
                     <option value="UPI">UPI (Preferred)</option>
                     <option value="Cash">Cash</option>
                     <option value="Card">Card/Debit</option>
                 </select>
             </div>
 
-            <button onclick="showReceipt()" class="qty-button checkout-button">
-                <i class="fas fa-receipt"></i> PLACE ORDER & GET RECEIPT
+            <button onclick="handleOrder()" class="qty-button checkout-button" style="background: var(--primary-green);">
+                <i class="fas fa-receipt"></i> PLACE ORDER
             </button>
         </div>
     </div>
@@ -554,58 +595,47 @@ body {
 </div>
 
 <script>
-// --- MENU DATA ---
 const menuData = {
-    // BREAKFAST
     poha: { name: "Poha", price: 20 },
     upma: { name: "Upma", price: 25 },
     idli: { name: "Idli Sambar", price: 35 },
     sandwich: { name: "Veg Sandwich", price: 40 },
-    // MEALS
     thali: { name: "Deluxe Veg Thali", price: 120 },
     biryani: { name: "Paneer Biryani", price: 120 },
     schezwanrice: { name: "Sch. Fried Rice", price: 85 },
     cholebhature: { name: "Chole Bhature", price: 95 },
-    // SNACKS
     samosa: { name: "Samosa (2 pcs)", price: 30 },
     fries: { name: "French Fries", price: 60 },
     vadapav: { name: "Vada Pav", price: 25 },
-    // BEVERAGES
     coffee: { name: "Coffee", price: 15 },
     tea: { name: "Tea (Chai)", price: 10 },
     cold: { name: "Cold Drink", price: 30 }
 };
 
-// --- CORE FUNCTIONS ---
+let currentTotal = 0;
 
-// Function to update quantity and manage minus button state
 function updateQty(itemId, delta) {
     const qtyElement = document.getElementById(`qty-${itemId}`);
     const minusButton = qtyElement.previousElementSibling;
     let currentQty = parseInt(qtyElement.textContent);
     
     let newQty = currentQty + delta;
-    if (newQty < 0) {
-        newQty = 0;
-    }
+    if (newQty < 0) newQty = 0;
     
     qtyElement.textContent = newQty;
-    
-    // Disable minus button if quantity is zero
     minusButton.disabled = (newQty === 0);
     
-    // Update cart summary and total
     updateCartSummary();
     calculate();
 }
 
-// Function to update the cart summary list in the sidebar
 function updateCartSummary() {
     let summaryHTML = "";
     let totalItems = 0;
     
     Object.keys(menuData).forEach(itemId => {
-        const qty = parseInt(document.getElementById(`qty-${itemId}`).textContent);
+        const qtyElement = document.getElementById(`qty-${itemId}`);
+        const qty = qtyElement ? parseInt(qtyElement.textContent) : 0;
         if (qty > 0) {
             summaryHTML += `
                 <div class="cart-item">
@@ -625,31 +655,24 @@ function updateCartSummary() {
     }
 }
 
-// Function to calculate the total bill
 function calculate() {
     let total = 0;
-    
     Object.keys(menuData).forEach(itemId => {
-        const qty = parseInt(document.getElementById(`qty-${itemId}`).textContent);
+        const qtyElement = document.getElementById(`qty-${itemId}`);
+        const qty = qtyElement ? parseInt(qtyElement.textContent) : 0;
         total += qty * menuData[itemId].price;
     });
-
+    currentTotal = total;
     document.getElementById("total").innerHTML = "Total Amount: ₹" + total;
 }
 
-// Function to filter the menu items based on the selected category
 function filterMenu(category, button) {
-    // 1. Update active button state
-    document.querySelectorAll('.filter-bar button').forEach(btn => {
-        btn.classList.remove('active');
-    });
+    document.querySelectorAll('.filter-bar button').forEach(btn => btn.classList.remove('active'));
     button.classList.add('active');
 
-    // 2. Filter menu items
     const menuItems = document.querySelectorAll('.item-card');
     menuItems.forEach(item => {
         const itemCategory = item.getAttribute('data-category');
-        
         if (category === 'all' || itemCategory === category) {
             item.classList.remove('hidden');
         } else {
@@ -658,137 +681,86 @@ function filterMenu(category, button) {
     });
 }
 
-// Function to generate and OPEN THE ATTRACTIVE RECEIPT IN A NEW TAB
-function showReceipt() {
-    calculate(); // Ensure total is fresh
-    let finalTotal = 0;
-    let totalItems = 0;
-    
-    Object.keys(menuData).forEach(itemId => {
-        totalItems += parseInt(document.getElementById(`qty-${itemId}`).textContent);
-    });
-
-    if (totalItems === 0) {
-        alert("Please add items to your cart before placing an order.");
+// HANDLER FOR ORDERING
+function handleOrder() {
+    calculate();
+    const name = document.getElementById("user-name").value.trim();
+    if (!name) {
+        alert("Please enter your name.");
+        return;
+    }
+    if (currentTotal === 0) {
+        alert("Your cart is empty.");
         return;
     }
 
+    const method = document.getElementById("payment").value;
+    if (method === "UPI") {
+        document.getElementById("qr-amount-text").innerText = "Total: ₹" + currentTotal;
+        document.getElementById("qr-modal").style.display = "flex";
+    } else {
+        finalizeOrder();
+    }
+}
+
+function closeQR() {
+    document.getElementById("qr-modal").style.display = "none";
+}
+
+function finalizeOrder() {
+    closeQR();
+    showReceipt();
+}
+
+function showReceipt() {
+    const name = document.getElementById("user-name").value;
     let payment = document.getElementById("payment").value;
     let itemRows = "";
+    let finalTotal = 0;
     
-    // Generate Item Rows and calculate total
     Object.keys(menuData).forEach(itemId => {
         const item = menuData[itemId];
         const qty = parseInt(document.getElementById(`qty-${itemId}`).textContent);
-        
         if (qty > 0) {
             const itemTotal = qty * item.price;
             finalTotal += itemTotal;
-            
             itemRows += `
                 <tr>
                     <td style="text-align: left; padding: 8px 0; border-bottom: 1px dashed #eee;">${item.name}</td>
                     <td style="text-align: center;">${qty}</td>
                     <td style="text-align: right;">₹${item.price}</td>
                     <td style="text-align: right;">₹${itemTotal}</td>
-                </tr>
-            `;
+                </tr>`;
         }
     });
 
-    // --- RECEIPT HTML CONTENT ---
     const receiptHTML = `
         <!DOCTYPE html>
         <html>
         <head>
             <title>Canteen Receipt</title>
             <style>
-                body {
-                    font-family: 'Arial', sans-serif;
-                    background-color: #f4f4f9;
-                    margin: 0;
-                    padding: 20px;
-                    display: flex;
-                    justify-content: center;
-                }
-                .receipt-box {
-                    width: 100%;
-                    max-width: 400px;
-                    background: #ffffff;
-                    border: 1px solid #ddd;
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-                    padding: 20px;
-                    border-radius: 8px;
-                }
-                .header-receipt {
-                    text-align: center;
-                    border-bottom: 3px double #333;
-                    margin-bottom: 20px;
-                    padding-bottom: 10px;
-                }
-                .header-receipt h1 {
-                    font-size: 1.5em;
-                    color: #4CAF50;
-                    margin: 0;
-                }
-                .header-receipt p {
-                    margin: 5px 0 0;
-                    font-size: 0.9em;
-                    color: #666;
-                }
-                .items-table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    font-size: 0.9em;
-                }
-                .items-table th {
-                    text-align: right;
-                    padding: 8px 0;
-                    border-bottom: 1px solid #333;
-                    font-weight: 700;
-                    color: #333;
-                }
-                .items-table th:first-child {
-                    text-align: left;
-                }
-                .total-section {
-                    margin-top: 20px;
-                    border-top: 1px dashed #333;
-                    padding-top: 15px;
-                }
-                .total-row {
-                    display: flex;
-                    justify-content: space-between;
-                    font-size: 1.2em;
-                    font-weight: 700;
-                    color: #4CAF50;
-                }
-                .footer-receipt {
-                    text-align: center;
-                    margin-top: 30px;
-                    font-size: 0.85em;
-                    color: #999;
-                }
-                .payment-info {
-                    margin-top: 10px;
-                    font-size: 0.9em;
-                    color: #333;
-                    display: flex;
-                    justify-content: space-between;
-                }
-                @media print {
-                    .footer-receipt { display: none; }
-                }
+                body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; display: flex; justify-content: center; }
+                .receipt-box { width: 100%; max-width: 400px; background: #fff; border: 1px solid #ddd; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+                .header-receipt { text-align: center; border-bottom: 3px double #333; margin-bottom: 20px; padding-bottom: 10px; }
+                .header-receipt h1 { font-size: 1.5em; color: #4CAF50; margin: 0; }
+                .items-table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+                .items-table th { text-align: right; padding: 8px 0; border-bottom: 1px solid #333; }
+                .items-table th:first-child { text-align: left; }
+                .total-section { margin-top: 20px; border-top: 1px dashed #333; padding-top: 15px; }
+                .total-row { display: flex; justify-content: space-between; font-size: 1.2em; font-weight: 700; color: #4CAF50; }
+                .footer-receipt { text-align: center; margin-top: 30px; font-size: 0.85em; color: #999; }
+                .user-info { margin-bottom: 10px; font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 5px; }
             </style>
         </head>
         <body>
             <div class="receipt-box">
                 <div class="header-receipt">
                     <h1>CAMPUS CANTEEN CONNECT</h1>
-                    <p>Transaction Date: ${new Date().toLocaleDateString()}</p>
+                    <p>Date: ${new Date().toLocaleDateString()}</p>
                     <p>Order ID: #CC${Math.floor(Math.random() * 100000)}</p>
                 </div>
-
+                <div class="user-info">Customer: ${name}</div>
                 <table class="items-table">
                     <thead>
                         <tr>
@@ -798,56 +770,39 @@ function showReceipt() {
                             <th style="width: 20%;">AMOUNT</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        ${itemRows}
-                    </tbody>
+                    <tbody>${itemRows}</tbody>
                 </table>
-
                 <div class="total-section">
-                    <div class="payment-info">
-                        <span>Payment Method:</span>
-                        <span>${payment}</span>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <span>Payment Method:</span><span>${payment}</span>
                     </div>
                     <div class="total-row">
-                        <span>GRAND TOTAL:</span>
-                        <span>₹${finalTotal}</span>
+                        <span>GRAND TOTAL:</span><span>₹${finalTotal}</span>
                     </div>
                 </div>
-
                 <div class="footer-receipt">
                     <button onclick="window.print()" style="padding: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">Print Receipt</button>
                     <p>Thank you for choosing Canteen Connect!</p>
-                    <p>Please show this receipt at the counter.</p>
                 </div>
             </div>
         </body>
-        </html>
-    `;
+        </html>`;
     
-    // Open in new tab
     const newTab = window.open("", "_blank");
     newTab.document.write(receiptHTML);
     newTab.document.close();
 }
 
-// Initial setup: Disable all minus buttons on load and apply initial filter
 window.onload = function() {
     Object.keys(menuData).forEach(itemId => {
         const qtyElement = document.getElementById(`qty-${itemId}`);
         if (qtyElement) {
-            const minusButton = qtyElement.previousElementSibling;
-            minusButton.disabled = true;
+            qtyElement.previousElementSibling.disabled = true;
         }
     });
-    
-    // Ensure 'All Items' is displayed on load
-    const allButton = document.querySelector('.filter-bar button.active');
-    if (allButton) {
-        filterMenu('all', allButton);
-    }
+    filterMenu('all', document.querySelector('.filter-bar button.active'));
 };
 </script>
 
 </body>
 </html>
-
